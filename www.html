@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>TOTM 타임머신 가상 네트워크 게이트웨이 v1.0</title>
+    <style>
+        /* ----------------------------------------------------------------- */
+        /* MS Windows 98 및 세기말 포털 고증 CSS 스타일 */
+        /* ----------------------------------------------------------------- */
+        body { 
+            background-color: #57a7a7; 
+            font-family: '돋움', 'Dotum', 'AppleGothic', sans-serif; 
+            font-size: 12px; 
+            color: #000; 
+            margin: 10px; 
+        }
+        .win98-window { 
+            background-color: #d4d0c8; 
+            border: 2px solid #fff; 
+            border-right: 2px solid #808080; 
+            border-bottom: 2px solid #808080; 
+            box-shadow: 1px 1px 0px #000; 
+            padding: 4px; 
+            margin-bottom: 15px;
+        }
+        .title-bar { 
+            background: linear-gradient(90deg, #000080, #1084d0); 
+            color: #fff; 
+            padding: 3px 6px; 
+            font-weight: bold; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .title-text { font-size: 12px; }
+        .window-body { padding: 10px; }
+        
+        /* 주소창 및 컨트롤 팩 스타일 */
+        .address-bar-zone {
+            background: #d4d0c8;
+            border-bottom: 2px solid #808080;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .url-input {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 2px 4px;
+            border: 2px solid #808080;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            background: #fff;
+            flex-grow: 1;
+        }
+        .win98-btn {
+            font-family: '돋움', sans-serif;
+            font-size: 12px;
+            padding: 2px 10px;
+            background: #d4d0c8;
+            border: 2px solid #fff;
+            border-right: 2px solid #808080;
+            border-bottom: 2px solid #808080;
+            box-shadow: 1px 1px 0 #000;
+            cursor: pointer;
+        }
+        .win98-btn:active {
+            border: 2px solid #808080;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            box-shadow: none;
+            padding: 3px 9px 1px 11px;
+        }
+
+        /* 하단 사이트맵 내비게이션 전용 스타일 (손터치 강제 고증) */
+        .totm-footer-map {
+            background-color: #d4d0c8; 
+            margin-top: 15px; 
+            padding: 10px; 
+            border-top: 2px solid #808080; 
+            box-shadow: inset 0 1px 0 #fff;
+        }
+        .totm-footer-map a {
+            cursor: pointer !important; /* 마우스 손터치(Pointer) 기능 강제 활성화 */
+            color: #000080;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .totm-footer-map a:hover {
+            color: #ff6600 !important; /* 마우스 올렸을 때 정감 있는 반전색 피드백 */
+            text-decoration: underline !important; /* 세기말 필수 밑줄 */
+        }
+        .divider { color: #808080; margin: 0 6px; font-weight: normal; }
+    </style>
+</head>
+<body>
+
+    <div class="win98-window">
+        <div class="title-bar">
+            <span class="title-text">?? Microsoft Internet Explorer 5.0 - 타임 아카이브 프록시</span>
+            <div style="background:#d4d0c8; width:14px; height:14px; border:1px solid #fff; border-right:1px solid #808080; border-bottom:1px solid #808080;"></div>
+        </div>
+        
+        <div class="address-bar-zone">
+            <span style="font-weight: bold; color: #444;">주소(A):</span>
+            <input type="text" id="urlBar" class="url-input" value="www.daum.net" placeholder="이동할 옛날 웹사이트 도메인을 입력하세요.">
+            <button class="win98-btn" onclick="goTimeWarp();" style="font-weight: bold;">이동</button>
+        </div>
+
+        <div class="window-body">
+            <h3>? 글로벌 시간선 (Target Timeline)</h3>
+            <p>현재 설정된 백업 시점: <b id="timeDisplay" style="color: red; font-size: 14px;">1999년 12월 31일</b></p>
+            <p style="color: #555; font-size: 11px;">※ 아래 달력 시스템이나 아카이브 배너를 조절한 뒤 상단 [이동] 버튼을 누르면 해당 날짜의 옛날 스크린샷 장부로 안전하게 워프합니다.</p>
+            
+            <div style="background: #fff; border: 1px solid #808080; padding: 5px; display: inline-block;">
+                연도: <select id="selYear" onchange="updateGlobalDate()"><option value="1998">1998</option><option value="1999" selected>1999</option><option value="2000">2000</option></select>
+                월: <select id="selMonth" onchange="updateGlobalDate()"><option value="05">05</option><option value="07">07</option><option value="12" selected>12</option></select>
+                일: <select id="selDay" onchange="updateGlobalDate()"><option value="01">01</option><option value="14">14</option><option value="31" selected>31</option></select>
+            </div>
+            
+            <br><br>
+            <form action="/live-save-injection" method="POST" style="margin: 0;">
+                <input type="hidden" id="injectDate" name="date" value="19991231">
+                <input type="hidden" id="injectUrl" name="url" value="www.daum.net">
+                <button type="submit" class="win98-btn" onclick="syncFormValues();" style="background: #e4e0d8; color: #a00000; font-weight: bold;">
+                    ??? web.archive.org 본진 실시간 백업 (Live Save Injection)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="win98-window">
+        <div class="title-bar"><span class="title-text">?? 사료 분류 아카이브</span></div>
+        <div class="window-body">
+            <a href="/category/vhs" class="win98-btn" style="text-decoration:none; display:inline-block; padding: 5px;">?? 세기말 VHS 방송 자료실</a>
+            <a href="/category/software" class="win98-btn" style="text-decoration:none; display:inline-block; padding: 5px;">?? 구버전 OS/유틸 디스크</a>
+        </div>
+    </div>
+
+    <div class="totm-footer-map">
+        <div style="text-align: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #808080;">
+            <a href="#sitemap" onclick="alert('??? [사이트맵]\nTime Machine 내부 내비게이션 전체 디렉토리 지도를 준비 중입니다.'); return false;" style="font-weight: bold;">사이트맵(지도)</a>
+            <span class="divider">|</span>
+            
+            <a href="#domain-history" onclick="alert('?? [도메인 만든 과정]\n당시 IMF 시절 도메인 등록 대행업체(아이네트, KREONET 등)를 통해 TOTM 네트워크를 구축한 가상 역사 사료입니다.'); return false;">도메인 만든 과정(등록업체들)</a>
+            <span class="divider">|</span>
+            
+            <a href="#sw-download" onclick="alert('?? [S/W 다운로드]\nWinamp 2.64, Netscape Communicator, 한메타자 등 세기말 필수 소프트웨어 보관소입니다.'); return false;" style="font-weight: bold;">S/W 다운로드</a>
+            <span class="divider">|</span>
+            
+            <a href="#proxy-addon" onclick="alert('?? [프록시 & 확장 프로그램]\nDOSBox-X 가상 머신 환경 및 레트로 브라우저 우회 접속용 프록시 설정 패키지.'); return false;">프록시 & 확장 프로그램 다운로드</a>
+            <span class="divider">|</span>
+            
+            <a href="#totm-oneclick" onclick="alert('?? [TOTM One Click 인터넷 최적화]\n56K 모뎀 대역폭 제한 해제 및 초기 ADSL/VDSL 랜카드 레지스트리 원클릭 가속 마법사를 다운로드합니다.'); return false;" style="color: #ff0000; text-decoration: underline; font-weight: bold;">TOTM One Click (S/W 다운로드 모뎀, 랜카드 원클릭 소프트웨어)</a>
+        </div>
+
+        <div style="text-align: center; font-size: 11px; margin-bottom: 5px;">
+            <a href="#about" onclick="alert('?? [TOTM 소개]\nTime Machine Project - 1990년대 후반 가상 오피스 및 기업 네트워크 복원 연구소'); return false;">TOTM소개</a>
+            <span class="divider">|</span>
+            
+            <a href="mailto:webmaster@totm.com" style="font-weight: bold;">
+                ?? 메일 <span style="font-size: 10px; color: #555;">(Outlook Express 연동)</span>
+            </a>
+            <span class="divider">|</span>
+            
+            <a href="#login" onclick="alert('?? [멤버십 시스템]\n로그인 및 새 회원 가입 게이트웨이를 호출합니다. (014XY 모뎀 프로토콜 호환)'); return false;">로그인/회원가입</a>
+            <span class="divider">|</span>
+            
+            <a href="#web-ad" onclick="alert('?? [웹광고 안내]\n728x90 상단 배너 및 IMF 극복 중소기업 지원용 스폰서십 광고 단가표 안내'); return false;">웹광고</a>
+            <span class="divider">|</span>
+            
+            <a href="#help" onclick="alert('? [도움말]\n인터넷 익스플로러 4.0 / 5.5 호환성 문제 및 미디어 플레이어 실시간 버퍼링 해결법'); return false;">도움말</a>
+        </div>
+
+        <div style="text-align: center; color: #666; font-size: 10px; margin-top: 10px; font-family: Tahoma, sans-serif;">
+            Copyright (c) 1998-2026 TOTM Time Machine Network All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        // 글로벌 가상 타임라인 동적 관리 변수
+        let globalYear = "1999";
+        let globalMonth = "12";
+        let globalDay = "31";
+
+        // 달력 조작 시 상태 갱신 함수
+        function updateGlobalDate() {
+            globalYear = document.getElementById('selYear').value;
+            globalMonth = document.getElementById('selMonth').value;
+            globalDay = document.getElementById('selDay').value;
+            
+            document.getElementById('timeDisplay').innerText = `${globalYear}년 ${globalMonth}월 ${globalDay}일`;
+            syncFormValues();
+        }
+
+        // 라이브 인젝션 전송 폼에 현재 날짜와 URL 동기화
+        function syncFormValues() {
+            const currentUrl = document.getElementById('urlBar').value.trim();
+            document.getElementById('injectDate').value = "" + globalYear + globalMonth + globalDay;
+            document.getElementById('injectUrl').value = currentUrl;
+        }
+
+        /**
+         * ?? 옛날 웹사이트 스크린샷 탐색실 강제 워프 엔진 (오류 해결 버전)
+         */
+        function goTimeWarp() {
+            let targetUrl = document.getElementById('urlBar').value.trim();
+
+            if (!targetUrl) {
+                alert("?? 탐색할 옛날 웹사이트 주소(도메인)를 입력하십시오.");
+                return;
+            }
+
+            // 고증 및 주소 유실 방지: 프로토콜이 빠진 경우 자동으로 접두사 부여
+            if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+                targetUrl = 'http://' + targetUrl;
+            }
+
+            // 시간선 스탬프 병합 (예: "19991231")
+            const targetDate = "" + globalYear + globalMonth + globalDay;
+            
+            console.log("[워프 시그널 가동] 시점:", targetDate, "| 대상 주소:", targetUrl);
+
+            // ?? 중요 핵심: URL 내 특수기호(/, :)가 라우터 경로를 붕괴시켜 
+            // "찾을 수 없습니다" 404가 뜨는 것을 방지하기 위해 특수문자를 인코딩 처리합니다.
+            const encodedUrl = encodeURIComponent(targetUrl);
+            
+            //Node.js 백엔드 프록시 허브로 안전하게 토스
+            window.location.href = "/proxy/" + targetDate + "/" + encodedUrl;
+        }
+
+        // 주소창 엔터키 입력 이벤트 리스너 추가
+        document.getElementById('urlBar').addEventListener('keydown', function(e) {
+            if (e.keyCode === 13) {
+                goTimeWarp();
+            }
+        });
+    </script>
+</body>
+</html>
